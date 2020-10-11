@@ -7,8 +7,8 @@ const MockERC20 = artifacts.require('MockERC20');
 
 contract("MasterChef", ([master, owner, nancy, alicy, dev, dev2, dev3, dev4]) => {
     beforeEach(async () => {
-        this.btf = await BTFToken.at("0x222FE577420B3dB9031495FCB423da333e8c4e96");
-        this.masterChef = await MasterChef.at("0x151D9D9466916B622eEDd4F95f42ce9c0F063009");
+        this.btf = await BTFToken.at(BTFToken.address);
+        this.masterChef = await MasterChef.at(MasterChef.address);
         console.log("owner: " + owner);
         console.log("<<<<<<<<MasterChef>>>>>>>>: " + (await this.btf.balanceOf(this.masterChef.address)));
     });
@@ -23,7 +23,7 @@ contract("MasterChef", ([master, owner, nancy, alicy, dev, dev2, dev3, dev4]) =>
 
     context('With ERC20/LP token added to the field', () => {
         beforeEach(async () => {
-            this.lp = await MockERC20.at("0x0673A6DB20fdFd8b44A8088A4E2d0df6adf2E102");
+            this.lp = await MockERC20.at(MockERC20.address);
             // await this.lp.transfer(nancy, '1000000', { from: owner });
         });
 

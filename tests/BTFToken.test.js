@@ -4,11 +4,11 @@ const ethers = require('ethers');
 const BTFToken = artifacts.require("BTFToken");
 
 contract("BTFToken", accounts => {
-    const owner = '0x37043E78a12D1D508F98CF842440F2F0B129A9bA';
-    const dev = '0x66261A0237fe7f82C1F5f4a4c26d2FA5F2931B74';
-    const dev2 = '0x412117d241a796C9DEb03B6eE227b0Cd85CFDE30';
+    const owner = accounts[0];
+    const dev = accounts[1];
+    const dev2 = accounts[2];
   	beforeEach(async () => {
-        this.btf = await BTFToken.at("0x5165C22c37DCfe149c98829991D86294e97324Be");
+        this.btf = await BTFToken.at(BTFToken.address);
     });
 
     // it token info
