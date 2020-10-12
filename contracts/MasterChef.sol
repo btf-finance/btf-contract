@@ -75,7 +75,7 @@ contract MasterChef is Ownable {
     }
 
     function setReferralPercent(uint256 _referralPercent) external onlyOwner {
-        require(_referralPercent > 0 && _referralPercent < 100, "_referralPercent is wrong");
+        require(_referralPercent > 0 && _referralPercent < referralMax, "_referralPercent is wrong");
         referralPercent = _referralPercent;
     }
 
