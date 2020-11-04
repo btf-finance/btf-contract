@@ -1,17 +1,28 @@
 ## Btf-protocol Smart Contracts
-BTFToken: [0x850eb951594F8df82413bbb3915D7CA2e394EEF3](https://etherscan.io/address/0x850eb951594F8df82413bbb3915D7CA2e394EEF3)
+BTFToken: [0xa80C32c721d06c91DcEFfEa78f184503c9046940](https://etherscan.io/address/0xa80C32c721d06c91DcEFfEa78f184503c9046940)
+
+BTF-USDC PAIR: [0xef7e58C3405AF2C393f72610c1981d64Aa55E5d3](https://etherscan.io/address/0xef7e58C3405AF2C393f72610c1981d64Aa55E5d3)
+
+BTF-ETH PAIR: [0x4F18FA10099ee416Cc9A12274d8b267273A95c6c](https://etherscan.io/address/0x4F18FA10099ee416Cc9A12274d8b267273A95c6c)
 
 BTFReferral: [0x8214f52E56B66Bb797b6003188d8Fb920F8c41ad](https://etherscan.io/address/0x8214f52E56B66Bb797b6003188d8Fb920F8c41ad)
 
 Timelock (12 hours): [0x6D4aA65af839813Fac3195dC2e44e8C539AC4a89](https://etherscan.io/address/0x6D4aA65af839813Fac3195dC2e44e8C539AC4a89)
 
-Masterchef（change）: [0xF713D5a4EcE5C943e6dd82b7e6297ABD4d476D37](https://etherscan.io/address/0xF713D5a4EcE5C943e6dd82b7e6297ABD4d476D37)
+Masterchef: [0xe550bfdb3f4de5a19f85d56f40394803e70b3e69](https://etherscan.io/address/0xe550bfdb3f4de5a19f85d56f40394803e70b3e69)
 
 Controller: [0x229Ad7298D0dD41755c9771B1Cf72c302D12E6FA](https://etherscan.io/address/0x229Ad7298D0dD41755c9771B1Cf72c302D12E6FA)
 
-Governance (multi-sig): [0xBA67F3b52a7C15F8abeb99d4BA9ccCDb5C664ee8](https://etherscan.io/address/0xBA67F3b52a7C15F8abeb99d4BA9ccCDb5C664ee8)
+Governance/Strategist (multi-sig 01): [0xd6ca32B782497a52a0F0E172Da9Ae28c1Df83B5A](https://etherscan.io/address/0xd6ca32B782497a52a0F0E172Da9Ae28c1Df83B5A)
+
+DevAddr (multi-sig 02): [0x33611Dc53870456776bFe10ed9dfe5ceeB2A60E6](https://etherscan.io/address/0x33611Dc53870456776bFe10ed9dfe5ceeB2A60E6)
+
+ComAddr (multi-sig 03): [0xBA67F3b52a7C15F8abeb99d4BA9ccCDb5C664ee8](https://etherscan.io/address/0xBA67F3b52a7C15F8abeb99d4BA9ccCDb5C664ee8)
 
 Vault ProfitBooster: [0xC24Ecc381faA4C467a373239e8aFb5de940922eA](https://etherscan.io/address/0xC24Ecc381faA4C467a373239e8aFb5de940922eA)
+
+Profit Share Pool: [0x978d16a76942bdc93ad3c884ff82a574c1b0038c](https://etherscan.io/address/0x978d16a76942bdc93ad3c884ff82a574c1b0038c)
+
 
 ## FARM LEVEL
 
@@ -35,12 +46,37 @@ Vault ProfitBooster: [0xC24Ecc381faA4C467a373239e8aFb5de940922eA](https://ethers
 ## STAKE LEVEL
 |  Pool Name | Stake Token | Reward Token | Weight |  Contract of Staking Token Contract  |
 |  ----       | ----   |  ----  |  ----  | ----  |
-| BTF-ETH Pool  | uni-v2-BTF-ETH LP | BTF |  6x|  [0x4F18FA10099ee416Cc9A12274d8b267273A95c6c](https://etherscan.io/address/0x4F18FA10099ee416Cc9A12274d8b267273A95c6c) |
-| bDAI Pool   | bDAI   | BTF |  1x |  [0x285544E16944fb2d24Ae1d83e6111D33d2eC1C80](https://etherscan.io/address/0x285544E16944fb2d24Ae1d83e6111D33d2eC1C80) |
-| bUSDC Pool  | bUSDC  | BTF |  1x |  [0xa1720c0146a1cEC87B6A99cdEB7FF47145ed4f84](https://etherscan.io/address/0xa1720c0146a1cEC87B6A99cdEB7FF47145ed4f84) |
+| Profit Share Pool  | BTF | BTF |  -|  [0x978d16a76942bdc93ad3c884ff82a574c1b0038c](https://etherscan.io/address/0x978d16a76942bdc93ad3c884ff82a574c1b0038c) |
+| BTF-USDC Pool  | uni-v2-BTF-USDC LP | BTF | 0x|  [0x82802853d01b0264282Dd0cB9738E9B6Ad8bEDEC](https://etherscan.io/address/0x82802853d01b0264282Dd0cB9738E9B6Ad8bEDEC)|
+| BTF-ETH Pool  | uni-v2-BTF-ETH LP | BTF |  8x|  [0xc2fd29279a063Ea7E83Ed6B2F20E67AFd4A95820](https://etherscan.io/address/0xc2fd29279a063Ea7E83Ed6B2F20E67AFd4A95820) |
+| bDAI Pool   | bDAI   | BTF |  3x |  [0x285544E16944fb2d24Ae1d83e6111D33d2eC1C80](https://etherscan.io/address/0x285544E16944fb2d24Ae1d83e6111D33d2eC1C80) |
+| bUSDC Pool  | bUSDC  | BTF |  3x |  [0xa1720c0146a1cEC87B6A99cdEB7FF47145ed4f84](https://etherscan.io/address/0xa1720c0146a1cEC87B6A99cdEB7FF47145ed4f84) |
 | -----  | -----   | ----- |  ----- | ----- | 
-| bUniDAI Pool  | bUniDAI | BTF |  4x |  [0xED95F14AFAF2495D3096DC26De825bC7CBcc6abC](https://etherscan.io/address/0xED95F14AFAF2495D3096DC26De825bC7CBcc6abC) |
-| bUniUSDC Pool  | bUniUSDC | BTF |  4x |  [0x92545517C90c10FB36cA4Ec23590413106105bf4](https://etherscan.io/address/0x92545517C90c10FB36cA4Ec23590413106105bf4) |
-| bUniUSDT Pool  | bUniUSDT | BTF |  4x |  [0xc0b7611533c32182D06837fDeab2778B3952a2c4](https://etherscan.io/address/0xc0b7611533c32182D06837fDeab2778B3952a2c4) |
-| bUniWBTC Pool  | bUniWBTC | BTF |  4x|  [0x326c37e35175c5869afF0730a617aaCC95dE595F](https://etherscan.io/address/0x326c37e35175c5869afF0730a617aaCC95dE595F) |
-| b3CRV Pool  | b3CRV | BTF |  1x|  [0x0b99CBd081B588bB75D7388Ab07bdE31Afb018f1](https://etherscan.io/address/0x0b99CBd081B588bB75D7388Ab07bdE31Afb018f1) |
+| bUniDAI Pool  | bUniDAI | BTF |  1x |  [0xED95F14AFAF2495D3096DC26De825bC7CBcc6abC](https://etherscan.io/address/0xED95F14AFAF2495D3096DC26De825bC7CBcc6abC) |
+| bUniUSDC Pool  | bUniUSDC | BTF |  1x |  [0x92545517C90c10FB36cA4Ec23590413106105bf4](https://etherscan.io/address/0x92545517C90c10FB36cA4Ec23590413106105bf4) |
+| bUniUSDT Pool  | bUniUSDT | BTF |  1x |  [0xc0b7611533c32182D06837fDeab2778B3952a2c4](https://etherscan.io/address/0xc0b7611533c32182D06837fDeab2778B3952a2c4) |
+| bUniWBTC Pool  | bUniWBTC | BTF |  1x|  [0x326c37e35175c5869afF0730a617aaCC95dE595F](https://etherscan.io/address/0x326c37e35175c5869afF0730a617aaCC95dE595F) |
+| b3CRV Pool  | b3CRV | BTF |  2x|  [0x0b99CBd081B588bB75D7388Ab07bdE31Afb018f1](https://etherscan.io/address/0x0b99CBd081B588bB75D7388Ab07bdE31Afb018f1) |
+| -----  | -----   | ----- |  ----- | ----- |
+
+## Ownerships
+
+BTFToken's owner = Masterchef
+
+MasterChef's owner = Timelock
+
+Timelock's owner = Gnosis Multisig01
+
+Profit Share Pool's owner = Gnosis Multisig01
+
+Vault's governance = Gnosis Multisig01
+
+Controller's governance = Gnosis Multisig01
+
+Controller's strategist = Gnosis Multisig01
+
+BTFReferral's owner = Gnosis Multisig01
+
+Strategyxxx's governance = Gnosis Multisig01
+
+Strategyxxx's strategist = Gnosis Multisig01
