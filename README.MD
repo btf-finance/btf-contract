@@ -48,7 +48,7 @@ Profit Share Pool: [0x978d16a76942bdc93ad3c884ff82a574c1b0038c](https://ethersca
 |  ----       | ----   |  ----  |  ----  | ----  |
 | Profit Share Pool  | BTF | BTF |  -|  [0x978d16a76942bdc93ad3c884ff82a574c1b0038c](https://etherscan.io/address/0x978d16a76942bdc93ad3c884ff82a574c1b0038c) |
 | BTF-USDC Pool  | uni-v2-BTF-USDC LP | BTF | 0x|  [0x82802853d01b0264282Dd0cB9738E9B6Ad8bEDEC](https://etherscan.io/address/0x82802853d01b0264282Dd0cB9738E9B6Ad8bEDEC)|
-| BTF-ETH Pool  | uni-v2-BTF-ETH LP | BTF |  8x|  [0xc2fd29279a063Ea7E83Ed6B2F20E67AFd4A95820](https://etherscan.io/address/0xc2fd29279a063Ea7E83Ed6B2F20E67AFd4A95820) |
+| BTF-ETH Pool  | uni-v2-BTF-ETH LP | BTF |  8x|  [xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx](https://etherscan.io/address/xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx) |
 | bDAI Pool   | bDAI   | BTF |  3x |  [0x285544E16944fb2d24Ae1d83e6111D33d2eC1C80](https://etherscan.io/address/0x285544E16944fb2d24Ae1d83e6111D33d2eC1C80) |
 | bUSDC Pool  | bUSDC  | BTF |  3x |  [0xa1720c0146a1cEC87B6A99cdEB7FF47145ed4f84](https://etherscan.io/address/0xa1720c0146a1cEC87B6A99cdEB7FF47145ed4f84) |
 | -----  | -----   | ----- |  ----- | ----- | 
