@@ -45,6 +45,18 @@ Profit Share Pool: [0x978d16a76942bdc93ad3c884ff82a574c1b0038c](https://ethersca
 | YCRV Vault  | YCRV    | bYCRV  |  StrategyCurveYCRV |  [0x15b1c273732734a93e4e233f6dfce4b64ca325f3](https://etherscan.io/address/0x15b1c273732734a93e4e233f6dfce4b64ca325f3)  | [Controller](https://etherscan.io/address/0x229Ad7298D0dD41755c9771B1Cf72c302D12E6FA)|
 
 
+### 2）LP stake mining strategie
+| Vault  |  Lock Token | LP Token Name | VaultStrategies  | PID | Vault Contract Address | controller |
+| ----  |  ----       | ----      |  ----  |  ----  |  ----  |  ----  |
+| DAI Vault   | DAI-ETH     | bUniDAI   |  StrategyUniEthDaiLp  |  1  |  [0x2c0d8B83B95A7CD809b2615bB76DcBecF8dBaAC8](https://etherscan.io/address/0x2c0d8B83B95A7CD809b2615bB76DcBecF8dBaAC8)  | [Controller](https://etherscan.io/address/0x229Ad7298D0dD41755c9771B1Cf72c302D12E6FA)|
+| USDC Vault  | USDC-ETH    | bUniUSDC  |  StrategyUniEthUsdcLp |  1  |  [0xB21CA0E0628356a326787616D8D62C2188BFF445](https://etherscan.io/address/0xB21CA0E0628356a326787616D8D62C2188BFF445)  | [Controller](https://etherscan.io/address/0x229Ad7298D0dD41755c9771B1Cf72c302D12E6FA)|
+| USDT Vault  | USDT-ETH    | bUniUSDT  |  StrategyUniEthUsdtLp |  1  |  [0x16f644Df844F95F21B445D9f38379F6E38118621](https://etherscan.io/address/0x16f644Df844F95F21B445D9f38379F6E38118621)  | [Controller](https://etherscan.io/address/0x229Ad7298D0dD41755c9771B1Cf72c302D12E6FA)|
+| WBTC Vault  | WBTC-ETH    | bUniWBTC  |  StrategyUniEthWbtcLp |  1  |  [0xCc9Bc2E388FFC79Ea0FEC84F8e857b968F6Ed0ee](https://etherscan.io/address/0xCc9Bc2E388FFC79Ea0FEC84F8e857b968F6Ed0ee)  | [Controller](https://etherscan.io/address/0x229Ad7298D0dD41755c9771B1Cf72c302D12E6FA)|
+| 3CRV Vault  | 3CRV    | b3CRV  |  StrategyCurve3CRV |  1  |  [0xD178c9099731aA3CD60804ce889eDe34da8310de](https://etherscan.io/address/0xD178c9099731aA3CD60804ce889eDe34da8310de)  | [Controller](https://etherscan.io/address/0x229Ad7298D0dD41755c9771B1Cf72c302D12E6FA)|
+| CCRV Vault  | CCRV    | bCCRV  |  StrategyCurveCCRV |  1  |  [0x5be5620dfb655a85262ab2b8700fe2085530f49f](https://etherscan.io/address/0x5be5620dfb655a85262ab2b8700fe2085530f49f)  | [Controller](https://etherscan.io/address/0x229Ad7298D0dD41755c9771B1Cf72c302D12E6FA)|
+| SCRV Vault  | SCRV    | bSCRV  |  StrategyCurveSCRV |  1  |  [0x44472e63c7c17761806da1ee07e3abe1937b1961](https://etherscan.io/address/0x44472e63c7c17761806da1ee07e3abe1937b1961)  | [Controller](https://etherscan.io/address/0x229Ad7298D0dD41755c9771B1Cf72c302D12E6FA)|
+| YCRV Vault  | YCRV    | bYCRV  |  StrategyCurveYCRV |  1  |  [0x15b1c273732734a93e4e233f6dfce4b64ca325f3](https://etherscan.io/address/0x15b1c273732734a93e4e233f6dfce4b64ca325f3)  | [Controller](https://etherscan.io/address/0x229Ad7298D0dD41755c9771B1Cf72c302D12E6FA)|
+
 
 ## STAKE LEVEL
 |  Pool Name | Stake Token | Reward Token | Weight |  Contract of Staking Token Contract  |
