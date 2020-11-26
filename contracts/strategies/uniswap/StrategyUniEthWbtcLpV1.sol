@@ -6,12 +6,12 @@ import "@openzeppelin/contracts/utils/Address.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 
-import "../interface/IController.sol";
-import "../interface/IStrategy.sol";
-import "../interface/IStakingRewards.sol";
-import "../interface/UniswapRouterV2.sol";
+import "../../interface/IController.sol";
+import "../../interface/IStrategy.sol";
+import "../../interface/IStakingRewards.sol";
+import "../../interface/UniswapRouterV2.sol";
 
-contract StrategyUniEthWbtcLp {
+contract StrategyUniEthWbtcLpV1 {
     using SafeERC20 for IERC20;
     using Address for address;
     using SafeMath for uint256;
@@ -58,17 +58,17 @@ contract StrategyUniEthWbtcLp {
     address public btf;
 
     constructor(
+        address _btf,
         address _governance,
         address _strategist,
         address _controller,
-        address _timelock,
-        address _btf
+        address _timelock
     ) public {
+        btf = _btf;
         governance = _governance;
         strategist = _strategist;
         controller = _controller;
         timelock = _timelock;
-        btf = _btf;
     }
 
     // **** Views ****
@@ -86,7 +86,7 @@ contract StrategyUniEthWbtcLp {
     }
 
     function getName() external pure returns (string memory) {
-        return "StrategyUniEthWbtcLp";
+        return "StrategyUniEthWbtcLpV1";
     }
 
     function getHarvestable() external view returns (uint256) {
@@ -95,23 +95,28 @@ contract StrategyUniEthWbtcLp {
 
     // **** Setters ****
 
-    function setKeepUNI(uint256 _keepUNI) external {
+    function setBtf(address _btf) public {
         require(msg.sender == governance, "!governance");
+        btf = _btf;
+    }
+
+    function setKeepUNI(uint256 _keepUNI) external {
+        require(msg.sender == timelock, "!timelock");
         keepUNI = _keepUNI;
     }
 
     function setWithdrawalFee(uint256 _withdrawalFee) external {
-        require(msg.sender == governance, "!governance");
+        require(msg.sender == timelock, "!timelock");
         withdrawalFee = _withdrawalFee;
     }
 
     function setPerformanceFee(uint256 _performanceFee) external {
-        require(msg.sender == governance, "!governance");
+        require(msg.sender == timelock, "!timelock");
         performanceFee = _performanceFee;
     }
 
     function setBurnFee(uint256 _burnFee) external {
-        require(msg.sender == governance, "!governance");
+        require(msg.sender == timelock, "!timelock");
         burnFee = _burnFee;
     }
 
@@ -131,7 +136,7 @@ contract StrategyUniEthWbtcLp {
     }
 
     function setController(address _controller) external {
-        require(msg.sender == governance, "!governance");
+        require(msg.sender == timelock, "!timelock");
         controller = _controller;
     }
 

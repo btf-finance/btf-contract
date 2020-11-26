@@ -6,44 +6,45 @@ import "@openzeppelin/contracts/utils/Address.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 
-import "../interface/IController.sol";
-import "../interface/IStrategy.sol";
-import "../interface/IStakingRewards.sol";
-import "../interface/UniswapRouterV2.sol";
-import "../interface/IYfvRewards.sol";
+import "../../interface/IController.sol";
+import "../../interface/IStrategy.sol";
+import "../../interface/IStakingRewards.sol";
+import "../../interface/UniswapRouterV2.sol";
+import "../../interface/USDT.sol";
 
-contract StrategyYfvDai {
+contract StrategyUniEthUsdtLpV1 {
+    // v2 Uses uniswap for less gas
+    // We can roll back to v1 if the liquidity is there
+
     using SafeERC20 for IERC20;
     using Address for address;
     using SafeMath for uint256;
 
-    // Staking rewards address for dai LP providers
-    address public constant rewards = 0xC2D55CE14a8e04AEF9B6bCfD105079b63C6a0AC8;
+    // Staking rewards address for ETH/USDT LP providers
+    address
+    public constant rewards = 0x6C3e4cb2E96B01F4b866965A91ed4437839A121a;
 
-    // want dai stablecoins
-    address public constant want = 0x6B175474E89094C44Da98b954EedeAC495271d0F;
+    // want eth/usdt lp tokens
+    address public constant want = 0x0d4a11d5EEaaC28EC3F61d100daF4d40471f1852;
 
     // tokens we're farming
-    address public constant yfv = 0x45f24BaEef268BB6d63AEe5129015d69702BCDfa;
+    address public constant uni = 0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984;
+
+    // stablecoins
+    address public constant usdt = 0xdAC17F958D2ee523a2206206994597C13D831ec7;
 
     // weth
     address public constant weth = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
-
-    // yfv vUSD
-    address public vUSD = 0x1B8E12F839BD4e73A47adDF76cF7F0097d74c14C;
-
-    // yfv vETH
-    address public vETH = 0x76A034e76Aa835363056dd418611E4f81870f16e;
 
     // dex
     address public univ2Router2 = 0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D;
 
     // Fees 5% in total
-    // - 1.5%   keepYFV for development fund
+    // - 1.5%   keepUNI for development fund
     // - 2%     performanceFee for community fund
     // - 1.5%   used to burn/repurchase btfs
-    uint256 public keepYFV = 150;
-    uint256 public constant keepYFVMax = 10000;
+    uint256 public keepUNI = 150;
+    uint256 public constant keepUNIMax = 10000;
 
     uint256 public performanceFee = 200;
     uint256 public constant performanceMax = 10000;
@@ -61,17 +62,17 @@ contract StrategyYfvDai {
     address public btf;
 
     constructor(
+        address _btf,
         address _governance,
         address _strategist,
         address _controller,
-        address _timelock,
-        address _btf
+        address _timelock
     ) public {
+        btf = _btf;
         governance = _governance;
         strategist = _strategist;
         controller = _controller;
         timelock = _timelock;
-        btf = _btf;
     }
 
     // **** Views ****
@@ -81,7 +82,7 @@ contract StrategyYfvDai {
     }
 
     function balanceOfPool() public view returns (uint256) {
-        return IYfvRewards(rewards).balanceOf(want, address(this));
+        return IStakingRewards(rewards).balanceOf(address(this));
     }
 
     function balanceOf() public view returns (uint256) {
@@ -89,32 +90,37 @@ contract StrategyYfvDai {
     }
 
     function getName() external pure returns (string memory) {
-        return "StrategyYfvDai";
+        return "StrategyUniEthUsdtLpV1";
     }
 
     function getHarvestable() external view returns (uint256) {
-        return IYfvRewards(rewards).earned(address(this));
+        return IStakingRewards(rewards).earned(address(this));
     }
 
     // **** Setters ****
 
-    function setKeepYFV(uint256 _keepYFV) external {
+    function setBtf(address _btf) public {
         require(msg.sender == governance, "!governance");
-        keepYFV = _keepYFV;
+        btf = _btf;
+    }
+
+    function setKeepUNI(uint256 _keepUNI) external {
+        require(msg.sender == timelock, "!timelock");
+        keepUNI = _keepUNI;
     }
 
     function setWithdrawalFee(uint256 _withdrawalFee) external {
-        require(msg.sender == governance, "!governance");
+        require(msg.sender == timelock, "!timelock");
         withdrawalFee = _withdrawalFee;
     }
 
     function setPerformanceFee(uint256 _performanceFee) external {
-        require(msg.sender == governance, "!governance");
+        require(msg.sender == timelock, "!timelock");
         performanceFee = _performanceFee;
     }
 
     function setBurnFee(uint256 _burnFee) external {
-        require(msg.sender == governance, "!governance");
+        require(msg.sender == timelock, "!timelock");
         burnFee = _burnFee;
     }
 
@@ -128,14 +134,14 @@ contract StrategyYfvDai {
         governance = _governance;
     }
 
+    function setController(address _controller) external {
+        require(msg.sender == timelock, "!timelock");
+        controller = _controller;
+    }
+
     function setTimelock(address _timelock) external {
         require(msg.sender == timelock, "!timelock");
         timelock = _timelock;
-    }
-
-    function setController(address _controller) external {
-        require(msg.sender == governance, "!governance");
-        controller = _controller;
     }
 
     // **** State Mutations ****
@@ -145,16 +151,8 @@ contract StrategyYfvDai {
         if (_want > 0) {
             IERC20(want).safeApprove(rewards, 0);
             IERC20(want).approve(rewards, _want);
-            IYfvRewards(rewards).stake(want, _want, IController(controller).comAddr());
+            IStakingRewards(rewards).stake(_want);
         }
-    }
-
-    // Controller only function for creating additional rewards from dust
-    function withdraw(IERC20 _asset) external returns (uint256 balance) {
-        require(msg.sender == controller, "!controller");
-        require(want != address(_asset), "want");
-        balance = _asset.balanceOf(address(this));
-        _asset.safeTransfer(controller, balance);
     }
 
     // Contoller only function for withdrawing for free
@@ -167,6 +165,14 @@ contract StrategyYfvDai {
             _amount = _amount.add(_balance);
         }
         IERC20(want).safeTransfer(msg.sender, _amount);
+    }
+
+    // Controller only function for creating additional rewards from dust
+    function withdraw(IERC20 _asset) external returns (uint256 balance) {
+        require(msg.sender == controller, "!controller");
+        require(want != address(_asset), "want");
+        balance = _asset.balanceOf(address(this));
+        _asset.safeTransfer(controller, balance);
     }
 
     // Withdraw partial funds, normally used with a vault withdrawal
@@ -209,7 +215,7 @@ contract StrategyYfvDai {
     }
 
     function _withdrawSome(uint256 _amount) internal returns (uint256) {
-        IYfvRewards(rewards).withdraw(want, _amount);
+        IStakingRewards(rewards).withdraw(_amount);
         return _amount;
     }
 
@@ -224,35 +230,72 @@ contract StrategyYfvDai {
         // i.e. will be be heavily frontrunned?
         //      if so, a new strategy will be deployed.
 
-        // Collects YFV tokens
-        IYfvRewards(rewards).getReward();
-        uint256 _yfv = IERC20(yfv).balanceOf(address(this));
-        if (_yfv > 0) {
-            if (keepYFV > 0) {
-                // some yfv locked up for future gov
-                uint256 _keepYFV = _yfv.mul(keepYFV).div(keepYFVMax);
-                IERC20(yfv).safeTransfer(
+        // Collects UNI tokens
+        IStakingRewards(rewards).getReward();
+        uint256 _uni = IERC20(uni).balanceOf(address(this));
+        if (_uni > 0) {
+            // 10% is locked up for future gov
+            if (keepUNI > 0) {
+                uint256 _keepUNI = _uni.mul(keepUNI).div(keepUNIMax);
+                IERC20(uni).safeTransfer(
                     IController(controller).devAddr(),
-                    _keepYFV
+                    _keepUNI
                 );
-                _yfv = _yfv.sub(_keepYFV);
+                _uni = _uni.sub(_keepUNI);
             }
 
+            _swap(uni, weth, _uni);
+        }
+
+        // Swap half WETH for USDT
+        uint256 _weth = IERC20(weth).balanceOf(address(this));
+        if (_weth > 0) {
+            // Burn some btfs first
             if (burnFee > 0) {
-                // Burn some btf
-                uint256 _burnFee = _yfv.mul(burnFee).div(burnMax);
-                _swap(yfv, btf, _burnFee);
+                uint256 _burnFee = _weth.mul(burnFee).div(burnMax);
+                _swap(weth, btf, _burnFee);
                 IERC20(btf).transfer(
                     IController(controller).burnAddr(),
                     IERC20(btf).balanceOf(address(this))
                 );
-                _yfv = _yfv.sub(_burnFee);
+                _weth = _weth.sub(_burnFee);
             }
 
-            // swap for want
-            _swap(yfv, want, _yfv);
+            _swap(weth, usdt, _weth.div(2));
         }
 
+        // Adds in liquidity for ETH/usdt
+        _weth = IERC20(weth).balanceOf(address(this));
+        uint256 _usdt = IERC20(usdt).balanceOf(address(this));
+        if (_weth > 0 && _usdt > 0) {
+            IERC20(weth).safeApprove(univ2Router2, 0);
+            IERC20(weth).safeApprove(univ2Router2, _weth);
+
+            USDT(usdt).approve(univ2Router2, _usdt);
+
+            UniswapRouterV2(univ2Router2).addLiquidity(
+                weth,
+                usdt,
+                _weth,
+                _usdt,
+                0,
+                0,
+                address(this),
+                now + 60
+            );
+
+            // Donates DUST
+            IERC20(weth).transfer(
+                IController(controller).comAddr(),
+                IERC20(weth).balanceOf(address(this))
+            );
+            USDT(usdt).transfer(
+                IController(controller).comAddr(),
+                IERC20(usdt).balanceOf(address(this))
+            );
+        }
+
+        // We want to get back UNI ETH/usdt LP tokens
         uint256 _want = IERC20(want).balanceOf(address(this));
         if (_want > 0) {
             // Performance fee
@@ -306,6 +349,7 @@ contract StrategyYfvDai {
     }
 
     // **** Internal functions ****
+
     function _swap(
         address _from,
         address _to,

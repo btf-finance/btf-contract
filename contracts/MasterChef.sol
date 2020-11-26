@@ -29,6 +29,19 @@ contract MasterChef is Ownable {
     // 1%
     uint256 public referralPercent = 100;
 
+    // Fees 20% in total
+    // - 15%   devFundFee for development fund
+    // - 5%     comFundFee for community fund
+    address public devAddr;
+    uint256 public devFundFee = 1500;
+    uint256 public constant devFundMax = 10000;
+
+    address public comAddr;
+    uint256 public comFundFee = 500;
+    uint256 public constant comFundMax = 10000;
+
+    address public timelock;
+
     // Info of each user.
     struct UserInfo {
         uint256 amount;
@@ -65,9 +78,12 @@ contract MasterChef is Ownable {
     event RewardPaid(address indexed user, uint256 reward);
     event EmergencyWithdraw(address indexed user, uint256 indexed pid, uint256 amount);
 
-    constructor(BTFToken _btf, uint256 _startBlock) public {
+    constructor(BTFToken _btf, uint256 _startBlock, address _devAddr, address _comAddr, address _timelock) public {
         btf = _btf;
         startBlock = _startBlock;
+        devAddr = _devAddr;
+        comAddr = _comAddr;
+        timelock = _timelock;
     }
 
     function setRewardReferral(address _rewardReferral) external onlyOwner {
@@ -79,17 +95,57 @@ contract MasterChef is Ownable {
         referralPercent = _referralPercent;
     }
 
+    function setDevFundFee(uint256 _devFundFee) external {
+        require(msg.sender == timelock, "!timelock");
+        devFundFee = _devFundFee;
+    }
+
+    // Update developer address by the previous dev.
+    function dev(address _devAddr) external {
+        require(msg.sender == devAddr, "!devaddr");
+        devAddr = _devAddr;
+    }
+
+    function setComFundFee(uint256 _comFundFee) external {
+        require(msg.sender == timelock, "!timelock");
+        comFundFee = _comFundFee;
+    }
+
+    // Update community address by timelock.
+    function com(address _comAddr) external {
+        require(msg.sender == timelock, "!timelock");
+        comAddr = _comAddr;
+    }
+
+    function setTimelock(address _timelock) external {
+        require(msg.sender == timelock, "!timelock");
+        timelock = _timelock;
+    }
+
     modifier reduceHalve() {
         require(btf.totalSupply() <= TotalSupply, "Out of limited.");
 
         if (periodFinish == 0) {
             periodFinish = block.timestamp.add(DURATION);
-            rewardRate = initReward.div(DURATION);
-            btf.mint(address(this), initReward);
+            uint256 _comReward = initReward.mul(comFundFee).div(comFundMax);
+            uint256 _devReward = initReward.mul(devFundFee).div(devFundMax);
+            uint256 _initReward = initReward.sub(_comReward).sub(_devReward);
+
+            rewardRate = _initReward.div(DURATION);
+            btf.mint(address(this), _initReward);
+            btf.mint(comAddr, _comReward);
+            btf.mint(devAddr, _devReward);
         } else if (block.timestamp >= periodFinish) {
             initReward = initReward.sub(initReward.mul(10).div(100));
-            rewardRate = initReward.div(DURATION);
-            btf.mint(address(this), initReward);
+            uint256 _comReward = initReward.mul(comFundFee).div(comFundMax);
+            uint256 _devReward = initReward.mul(devFundFee).div(devFundMax);
+            uint256 _initReward = initReward.sub(_comReward).sub(_devReward);
+
+            rewardRate = _initReward.div(DURATION);
+            btf.mint(address(this), _initReward);
+            btf.mint(comAddr, _comReward);
+            btf.mint(devAddr, _devReward);
+
             periodFinish = block.timestamp.add(DURATION);
             emit RewardAdded(initReward);
         }
@@ -223,11 +279,6 @@ contract MasterChef is Ownable {
         user.amount = user.amount.sub(_amount);
         pool.lpToken.safeTransfer(address(msg.sender), _amount);
         emit Withdraw(msg.sender, _pid, _amount);
-    }
-
-    // Withdraw LP tokens & Rewards from MasterChef
-    function exit(uint256 _pid) external {
-        withdraw(_pid, balanceOf(msg.sender));
     }
 
     // Withdraw without caring about rewards. EMERGENCY ONLY.

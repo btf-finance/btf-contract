@@ -6,32 +6,27 @@ import "@openzeppelin/contracts/utils/Address.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 
-import "../interface/IController.sol";
-import "../interface/IStrategy.sol";
-import "../interface/IStakingRewards.sol";
-import "../interface/UniswapRouterV2.sol";
-import "../interface/USDT.sol";
+import "../../interface/IController.sol";
+import "../../interface/IStrategy.sol";
+import "../../interface/IStakingRewards.sol";
+import "../../interface/UniswapRouterV2.sol";
 
-contract StrategyUniEthUsdtLp {
-    // v2 Uses uniswap for less gas
-    // We can roll back to v1 if the liquidity is there
-
+contract StrategyUniEthDaiLpV1 {
     using SafeERC20 for IERC20;
     using Address for address;
     using SafeMath for uint256;
 
-    // Staking rewards address for ETH/USDT LP providers
-    address
-    public constant rewards = 0x6C3e4cb2E96B01F4b866965A91ed4437839A121a;
+    // Staking rewards address for ETH/DAI LP providers
+    address public constant rewards = 0xa1484C3aa22a66C62b77E0AE78E15258bd0cB711;
 
-    // want eth/usdt lp tokens
-    address public constant want = 0x0d4a11d5EEaaC28EC3F61d100daF4d40471f1852;
+    // want eth/dai lp tokens
+    address public constant want = 0xA478c2975Ab1Ea89e8196811F51A7B7Ade33eB11;
 
     // tokens we're farming
     address public constant uni = 0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984;
 
     // stablecoins
-    address public constant usdt = 0xdAC17F958D2ee523a2206206994597C13D831ec7;
+    address public constant dai = 0x6B175474E89094C44Da98b954EedeAC495271d0F;
 
     // weth
     address public constant weth = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
@@ -62,17 +57,18 @@ contract StrategyUniEthUsdtLp {
     address public btf;
 
     constructor(
+        address _btf,
         address _governance,
         address _strategist,
         address _controller,
-        address _timelock,
-        address _btf
+        address _timelock
     ) public {
+        btf = _btf;
         governance = _governance;
         strategist = _strategist;
         controller = _controller;
         timelock = _timelock;
-        btf = _btf;
+
     }
 
     // **** Views ****
@@ -90,7 +86,7 @@ contract StrategyUniEthUsdtLp {
     }
 
     function getName() external pure returns (string memory) {
-        return "StrategyUniEthUsdtLp";
+        return "StrategyUniEthDaiLpV1";
     }
 
     function getHarvestable() external view returns (uint256) {
@@ -98,24 +94,28 @@ contract StrategyUniEthUsdtLp {
     }
 
     // **** Setters ****
+    function setBtf(address _btf) public {
+        require(msg.sender == governance, "!governance");
+        btf = _btf;
+    }
 
     function setKeepUNI(uint256 _keepUNI) external {
-        require(msg.sender == governance, "!governance");
+        require(msg.sender == timelock, "!timelock");
         keepUNI = _keepUNI;
     }
 
     function setWithdrawalFee(uint256 _withdrawalFee) external {
-        require(msg.sender == governance, "!governance");
+        require(msg.sender == timelock, "!timelock");
         withdrawalFee = _withdrawalFee;
     }
 
     function setPerformanceFee(uint256 _performanceFee) external {
-        require(msg.sender == governance, "!governance");
+        require(msg.sender == timelock, "!timelock");
         performanceFee = _performanceFee;
     }
 
     function setBurnFee(uint256 _burnFee) external {
-        require(msg.sender == governance, "!governance");
+        require(msg.sender == timelock, "!timelock");
         burnFee = _burnFee;
     }
 
@@ -129,14 +129,14 @@ contract StrategyUniEthUsdtLp {
         governance = _governance;
     }
 
-    function setController(address _controller) external {
-        require(msg.sender == governance, "!governance");
-        controller = _controller;
-    }
-
     function setTimelock(address _timelock) external {
         require(msg.sender == timelock, "!timelock");
         timelock = _timelock;
+    }
+
+    function setController(address _controller) external {
+        require(msg.sender == timelock, "!timelock");
+        controller = _controller;
     }
 
     // **** State Mutations ****
@@ -150,6 +150,14 @@ contract StrategyUniEthUsdtLp {
         }
     }
 
+    // Controller only function for creating additional rewards from dust
+    function withdraw(IERC20 _asset) external returns (uint256 balance) {
+        require(msg.sender == controller, "!controller");
+        require(want != address(_asset), "want");
+        balance = _asset.balanceOf(address(this));
+        _asset.safeTransfer(controller, balance);
+    }
+
     // Contoller only function for withdrawing for free
     // This is used to swap between vaults
     function freeWithdraw(uint256 _amount) external {
@@ -160,14 +168,6 @@ contract StrategyUniEthUsdtLp {
             _amount = _amount.add(_balance);
         }
         IERC20(want).safeTransfer(msg.sender, _amount);
-    }
-
-    // Controller only function for creating additional rewards from dust
-    function withdraw(IERC20 _asset) external returns (uint256 balance) {
-        require(msg.sender == controller, "!controller");
-        require(want != address(_asset), "want");
-        balance = _asset.balanceOf(address(this));
-        _asset.safeTransfer(controller, balance);
     }
 
     // Withdraw partial funds, normally used with a vault withdrawal
@@ -242,7 +242,7 @@ contract StrategyUniEthUsdtLp {
             _swap(uni, weth, _uni);
         }
 
-        // Swap half WETH for USDT
+        // Swap half WETH for DAI
         uint256 _weth = IERC20(weth).balanceOf(address(this));
         if (_weth > 0) {
             // Burn some btfs first
@@ -256,23 +256,24 @@ contract StrategyUniEthUsdtLp {
                 _weth = _weth.sub(_burnFee);
             }
 
-            _swap(weth, usdt, _weth.div(2));
+            _swap(weth, dai, _weth.div(2));
         }
 
-        // Adds in liquidity for ETH/usdt
+        // Adds in liquidity for ETH/DAI
         _weth = IERC20(weth).balanceOf(address(this));
-        uint256 _usdt = IERC20(usdt).balanceOf(address(this));
-        if (_weth > 0 && _usdt > 0) {
+        uint256 _dai = IERC20(dai).balanceOf(address(this));
+        if (_weth > 0 && _dai > 0) {
             IERC20(weth).safeApprove(univ2Router2, 0);
             IERC20(weth).safeApprove(univ2Router2, _weth);
 
-            USDT(usdt).approve(univ2Router2, _usdt);
+            IERC20(dai).safeApprove(univ2Router2, 0);
+            IERC20(dai).safeApprove(univ2Router2, _dai);
 
             UniswapRouterV2(univ2Router2).addLiquidity(
                 weth,
-                usdt,
+                dai,
                 _weth,
-                _usdt,
+                _dai,
                 0,
                 0,
                 address(this),
@@ -284,13 +285,13 @@ contract StrategyUniEthUsdtLp {
                 IController(controller).comAddr(),
                 IERC20(weth).balanceOf(address(this))
             );
-            USDT(usdt).transfer(
+            IERC20(dai).transfer(
                 IController(controller).comAddr(),
-                IERC20(usdt).balanceOf(address(this))
+                IERC20(dai).balanceOf(address(this))
             );
         }
 
-        // We want to get back UNI ETH/usdt LP tokens
+        // We want to get back UNI ETH/DAI LP tokens
         uint256 _want = IERC20(want).balanceOf(address(this));
         if (_want > 0) {
             // Performance fee
@@ -344,7 +345,6 @@ contract StrategyUniEthUsdtLp {
     }
 
     // **** Internal functions ****
-
     function _swap(
         address _from,
         address _to,

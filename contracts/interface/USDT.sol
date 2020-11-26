@@ -4,4 +4,6 @@ interface USDT {
     function approve(address guy, uint256 wad) external;
 
     function transfer(address _to, uint256 _value) external;
+
+    function transferFrom(address _from, address _to, uint256 _value) external;
 }

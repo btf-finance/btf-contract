@@ -9,6 +9,8 @@ import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 import "../interface/IController.sol";
 
 contract Vault is ERC20 {
+    uint256 public constant underlyingUnit = 1e18;
+
     using SafeERC20 for IERC20;
     using Address for address;
     using SafeMath for uint256;
@@ -20,8 +22,13 @@ contract Vault is ERC20 {
 
     address public governance;
     address public controller;
-    // todo
-    address public constant profitBooster = address(0);
+    address public constant profitBooster = 0xC24Ecc381faA4C467a373239e8aFb5de940922eA;
+
+    bool public acceptContractDepositor = false;
+    mapping(address => bool) public whitelistedContract;
+
+    // no limit
+    uint totalDepositCap = 0;
 
     constructor(address _token, address _governance, address _controller)
     public
@@ -36,6 +43,16 @@ contract Vault is ERC20 {
         controller = _controller;
     }
 
+    /**
+    * @dev Throws if called by a not-whitelisted contract while we do not accept contract depositor.
+    */
+    modifier checkContract() {
+        if (!acceptContractDepositor && !whitelistedContract[msg.sender]) {
+            require(!address(msg.sender).isContract() && msg.sender == tx.origin, "contract not support");
+        }
+        _;
+    }
+
     function balance() public view returns (uint256) {
         return
         token.balanceOf(address(this)).add(
@@ -44,13 +61,30 @@ contract Vault is ERC20 {
     }
 
     function balanceOfToken() public view returns (uint256) {
+        uint256 tokenBalanceWithoutBooster = balance().sub(balanceOf(profitBooster));
+        uint256 totalSupplyWithoutBooster = totalSupply().sub(balanceOf(profitBooster));
+
         if (profitBooster == msg.sender) {
             return balanceOf(profitBooster);
+        } else if (tokenBalanceWithoutBooster == 0 || totalSupplyWithoutBooster == 0) {
+            return 0;
         } else {
-            return (balance().sub(balanceOf(profitBooster)))
-            .mul(balanceOf(msg.sender))
-            .div(totalSupply().sub(balanceOf(profitBooster)));
+            return tokenBalanceWithoutBooster.mul(balanceOf(msg.sender)).div(totalSupplyWithoutBooster);
         }
+    }
+
+    function cap() external view returns (uint) {
+        return totalDepositCap;
+    }
+
+    function setAcceptContractDepositor(bool _acceptContractDepositor) external {
+        require(msg.sender == governance, "!governance");
+        acceptContractDepositor = _acceptContractDepositor;
+    }
+
+    function setWhitelistedContract(address _contract, bool _accept) external {
+        require(msg.sender == governance, "!governance");
+        whitelistedContract[_contract] = _accept;
     }
 
     function setMin(uint256 _min) external {
@@ -68,6 +102,11 @@ contract Vault is ERC20 {
         controller = _controller;
     }
 
+    function setCap(uint _cap) external {
+        require(msg.sender == governance, "!governance");
+        totalDepositCap = _cap;
+    }
+
     // Custom logic in here for how much the token allows to be borrowed
     // Sets minimum required on-hand to keep small withdrawals cheap
     function available() public view returns (uint256) {
@@ -80,11 +119,14 @@ contract Vault is ERC20 {
         IController(controller).earn(address(token), _bal);
     }
 
-    function depositAll() external {
+    function depositAll() external checkContract {
         deposit(token.balanceOf(msg.sender));
     }
 
-    function deposit(uint256 _amount) public {
+    function deposit(uint256 _amount) public checkContract {
+        uint _pool = balance();
+        require(totalDepositCap == 0 || _pool <= totalDepositCap, ">totalDepositCap");
+
         uint256 tokenBalanceWithoutBooster = balance().sub(balanceOf(profitBooster));
         uint256 totalSupplyWithoutBooster = totalSupply().sub(balanceOf(profitBooster));
 
@@ -141,8 +183,11 @@ contract Vault is ERC20 {
         token.safeTransfer(msg.sender, r);
     }
 
+    // price per share
     function getRatio() public view returns (uint256) {
-        return balance().mul(1e18).div(totalSupply());
+        return totalSupply() == 0
+        ? underlyingUnit
+        : underlyingUnit.mul(balance().sub(balanceOf(profitBooster))).div(totalSupply().sub(balanceOf(profitBooster)));
     }
 }
 
